@@ -1,29 +1,18 @@
-import sahamyab.sahamyab_symbol_history as history
-import mysql.connector
-mydb = mysql.connector.connect(
-    host = 'localhost',
-    user = 'root',
-    password = '19@mY%718',
-    database = 'sahamyab',
-)
+# this is a temp file
 
-mycursor = mydb.cursor()
-
-# ------------------------------ MySql Guide -----------------------------------------
-
-# SELECT (column) FROM (table) WHERE
+# import data_catcher.history as history
+#
+# sahamyab_data = history.sahamyab_dataframe("وغدیر", 12)
+# db_data = history.database_dataframe()
+#
+#
+# if __name__ == "__main__":
+#     print(sahamyab_data)
 
 
 
 
-if __name__ == "__main__":
 
-    last_data = int(get_last_data("time"))
-    print(last_data)
-
-    symbol = 'وغدیر'
-    data = history.get_data_period(symbol, from_date=last_data)
-    print(data)
 
 
 

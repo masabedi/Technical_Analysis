@@ -10,8 +10,17 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 # for going many years or month we want to the past
 import json
+import pandas as pd
 
+import mysql.connector
+mydb = mysql.connector.connect(
+    host = 'localhost',
+    user = 'root',
+    password = '19@mY%718',
+    database = 'sahamyab',
+)
 
+mycursor = mydb.cursor()
 
 
 
@@ -24,7 +33,7 @@ def going_past(month):
     return relative_month_timestamp
 
 
-def get_data(symbol, history_months, resolution="D"):
+def get_data(symbol, history_months:int, resolution="D"):
     from_date = int(going_past(history_months))
     to_date = int(going_past(0))
     url =  "https://www.sahamyab.com/guest/tradingview/history?adjustment=&symbol=" + str(symbol) + "&resolution=" + str(resolution) + "&from=" + str(from_date) + "&to=" + str(to_date)
@@ -42,6 +51,9 @@ def get_data_period(symbol, from_date, resolution="D"):
     response = requests.get(url=url)
     json_file = response.json()
     return json_file
+
+
+
 
 # keys = t, c, h, l, v
 
@@ -74,6 +86,58 @@ def get_data_period(symbol, from_date, resolution="D"):
 #                   "id INTEGER AUTO_INCREMENT PRIMARY key) ")
 # -------------------------------
 
+
+
+# ------------------------------ Convert Data from database -----------------------------------------
+
+def get_data_mysql(row):
+    command = "SELECT " + row + " FROM prices"
+    mycursor.execute(command)
+    data = mycursor.fetchall()
+    return data
+
+
+# convert data from database to panda data frame
+def database_convertor(data):
+    columns = ["time", "close", "high", "low", "open", "value"]
+    df = pd.DataFrame(columns=columns)
+    for i in data:
+        time = i[1]
+        close = i[2]
+        high = i[3]
+        low = i[4]
+        open = i[5]
+        value = i[6]
+        item = [time, close, high, low, open, value]
+        append_df = pd.DataFrame([item], columns=columns)
+        df = df.append(append_df, ignore_index=True)
+    return df
+
+# make data frame
+def database_dataframe():
+    db_data = get_data_mysql("*")
+    database_data = database_convertor(db_data)
+    return database_data
+
+
+# ------------------------------ Convert Data from Sahamyab -----------------------------------------
+
+# convert data from sahamyab to panda data frame
+def sahamyab_convertor(data:dict):
+    df = pd.DataFrame(columns=["time", "close", "high", "low", "open", "value"])
+    df["time"] = data.get("t")
+    df["close"] = data.get("c")
+    df["high"] = data.get("h")
+    df["low"] = data.get("l")
+    df["open"] = data.get("o")
+    df["value"] = data.get("v")
+    return df
+
+# make data frame
+def sahamyab_dataframe(symbol, months):
+    sy_data = get_data(symbol=symbol, history_months=months)
+    sahamyab_data = sahamyab_convertor(sy_data)
+    return sahamyab_data
 
 
 
