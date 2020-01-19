@@ -124,13 +124,14 @@ def database_dataframe():
 
 # convert data from sahamyab to panda data frame
 def sahamyab_convertor(data:dict):
-    df = pd.DataFrame(columns=["time", "close", "high", "low", "open", "value"])
-    df["time"] = data.get("t")
-    df["close"] = data.get("c")
-    df["high"] = data.get("h")
-    df["low"] = data.get("l")
-    df["open"] = data.get("o")
-    df["value"] = data.get("v")
+    df = pd.DataFrame(columns=["Open","High","Low","Close","Volume"])
+
+    df.index = data.get("t")
+    df["Close"] = data.get("c")
+    df["High"] = data.get("h")
+    df["Low"] = data.get("l")
+    df["Open"] = data.get("o")
+    df["Volume"] = data.get("v")
     return df
 
 # make data frame

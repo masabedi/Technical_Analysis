@@ -12,3 +12,15 @@ data format in data catcher is like this :
     
 last index is last record
 
+### libraries 
+    pyfolio
+    emoyrical
+    zipline
+    yahoofinancials
+    warnings
+    matplotlib.pyplot
+    tulipy
+    talib
+    ta
+    backtesting
+    pyalgotrade
