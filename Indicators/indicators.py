@@ -1,14 +1,14 @@
 import datetime
-import data_catcher.history as history
+# import data_catcher.history as history
 import pandas as pd
 import talib
 
-sahamyab_data = history.sahamyab_dataframe("وغدیر", 12)
-db_data = history.database_dataframe()
+# sahamyab_data = history.sahamyab_dataframe("وغدیر", 12)
+# db_data = history.database_dataframe()
+#
+# data = db_data
 
-data = db_data
-
-# columns = ['time', 'close', 'high', 'low', 'open', 'value']
+# columns = ['time', 'Close', 'High', 'Low', 'Open', 'value']
 # end date is 1398/10/10  = 1577750400
 
 # General functions ============================================================
@@ -22,16 +22,15 @@ def profit_calculation(data, signal_column_name: str):
 
     for i in range(len(data)):
         if data.loc[i, signal_column_name] == 'buy':
-            buy_price += data.loc[i, 'close']
+            buy_price += data.loc[i, 'Close']
             buy_count += 1
         elif data.loc[i, signal_column_name] == 'sell':
-            sell_price += data.loc[i, 'close']
+            sell_price += data.loc[i, 'Close']
             sell_count += 1
     average_buy = buy_price / buy_count
     average_sell = sell_price / sell_count
     profit = ((average_sell - average_buy) / average_buy) * 100
     return profit
-
 
 def range_signal_calculator(data: pd.DataFrame, indicator: str, overbought_range: int, oversold_range: int):
 
@@ -66,7 +65,6 @@ def range_signal_calculator(data: pd.DataFrame, indicator: str, overbought_range
 
     return data
 
-
 def cross_signal_calculation(data: pd.DataFrame, indicator: str, first_line: str, second_line: str):
     signal = indicator + "_signal"
     data[signal] = None
@@ -95,7 +93,6 @@ def cross_signal_calculation(data: pd.DataFrame, indicator: str, first_line: str
         data.loc[period1, signal] = trend
     data.loc[0, signal] = "-"
     return data
-
 
 def amount_signal_calculation(data:pd.DataFrame, indicator:str, base_value:int):
     signal = indicator + "_signal"
@@ -137,19 +134,19 @@ def date_convertor(timestapm_columns):
 def bollinger_calculation(data):
     name1 = "bollinger_upperband"
     name2 = "bollinger_middleband"
-    name3 = "bollinger_lowerband"
+    name3 = "bollinger_Lowerband"
 
-    upperband, middleband, lowerband = talib.BBANDS(data["close"], timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
+    upperband, middleband, Lowerband = talib.BBANDS(data["Close"], timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
     data[name1] = upperband
     data[name2] = middleband
-    data[name3] = lowerband
+    data[name3] = Lowerband
 
     return data[[name1, name2, name3]]
 
 # Average True Range (ATR)
 def atr_calculation(data, timeperiod=14):
     name = "atr"
-    atr = talib.ATR(data["high"], data["low"], data["close"], timeperiod=timeperiod)
+    atr = talib.ATR(data["High"], data["Low"], data["Close"], timeperiod=timeperiod)
     data[name] = atr
     return data[[name]]
 
@@ -157,20 +154,29 @@ def atr_calculation(data, timeperiod=14):
 def ema_calculation(data, n1=5, n2=35):
     name1 = "ema" + str(n1)
     name2 = "ema" + str(n2)
-    ema1 = talib.EMA(data["close"], timeperiod=n1)
-    ema2 = talib.EMA(data["close"], timeperiod=n2)
+    ema1 = talib.EMA(data["Close"], timeperiod=n1)
+    ema2 = talib.EMA(data["Close"], timeperiod=n2)
 
     data[name1] = ema1
     data[name2] = ema2
     return data[[name1, name2]]
 
+
+# SMA
+def sma_calculation(data, n=30):
+    name = "sma" + str(n)
+    sma = talib.SMA(data["Close"], timeperiod=n)
+    data["Close"] = sma
+    return data["Close"]
+
+
 # Moving Average Convergence Divergence (MACD)
-def macd_calculation(data, fastperiod=12, slowperiod=26, signalperiod=9):
+def macd_calculation(data, fastperiod=12, sLowperiod=26, signalperiod=9):
     name1 = "macd"
     name2 = "macdsignal"
     name3 = "macdhist"
 
-    macd, macdsignal, macdhist = talib.MACD(data["close"], fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
+    macd, macdsignal, macdhist = talib.MACD(data["Close"], fastperiod=fastperiod, sLowperiod=sLowperiod, signalperiod=signalperiod)
 
     data[name1] = macd
     data[name2] = macdsignal
@@ -181,7 +187,7 @@ def macd_calculation(data, fastperiod=12, slowperiod=26, signalperiod=9):
 def adx_calculator(data, timeperiod=14):
     name1 = "adx"
 
-    adx = talib.ADX(data["high"], data["low"], data["close"], timeperiod=timeperiod)
+    adx = talib.ADX(data["High"], data["Low"], data["Close"], timeperiod=timeperiod)
 
     data[name1] = adx
 
@@ -190,14 +196,14 @@ def adx_calculator(data, timeperiod=14):
 # Commodity Channel Index (CCI)
 def cci_calculation(data, timeperiod=14):
     name = "cci"
-    cci = talib.CCI(data["high"], data["low"], data["close"], timeperiod=timeperiod)
+    cci = talib.CCI(data["High"], data["Low"], data["Close"], timeperiod=timeperiod)
     data[name] = cci
     return data[[name]]
 
 # Parabolic Stop And Reverse (Parabolic SAR)
 def sar_calculation(data, acceleration=0.02, maximum=0.2):
     name = "sar"
-    sar = talib.SAR(data["high"], data["low"], acceleration=acceleration, maximum=maximum)
+    sar = talib.SAR(data["High"], data["Low"], acceleration=acceleration, maximum=maximum)
     data[name] = sar
 
     return data[[name]]
@@ -207,7 +213,7 @@ def sar_calculation(data, acceleration=0.02, maximum=0.2):
 def aroon_calculator(data, timeperiod=14):
     name1 = "aroonup"
     name2 = "aroondown"
-    aroondown, aroonup = talib.AROON(data["high"], data["low"], timeperiod=timeperiod)
+    aroondown, aroonup = talib.AROON(data["High"], data["Low"], timeperiod=timeperiod)
 
     data[name1] = aroonup
     data[name2] = aroondown
@@ -215,22 +221,22 @@ def aroon_calculator(data, timeperiod=14):
 
 
 # Stochastic Oscillator (SR)
-def stoch_caclulation(data, fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3,
-                         slowd_matype=0):
-    name1 = "stoch_slowk"
-    name2 = "stoch_slowd"
+def stoch_caclulation(data, fastk_period=5, sLowk_period=3, sLowk_matype=0, sLowd_period=3,
+                         sLowd_matype=0):
+    name1 = "stoch_sLowk"
+    name2 = "stoch_sLowd"
 
-    slowk, slowd = talib.STOCH(data["high"], data["low"], data["close"], fastk_period=fastk_period, slowk_period=slowk_period, slowk_matype=slowk_matype, slowd_period=slowd_period,
-                         slowd_matype=slowd_matype)
-    data[name1] = slowk
-    data[name2] = slowd
+    sLowk, sLowd = talib.STOCH(data["High"], data["Low"], data["Close"], fastk_period=fastk_period, sLowk_period=sLowk_period, sLowk_matype=sLowk_matype, sLowd_period=sLowd_period,
+                         sLowd_matype=sLowd_matype)
+    data[name1] = sLowk
+    data[name2] = sLowd
 
     return data[[name1, name2]]
 
 # Relative Strength Index (RSI)
 def rsi_calculation(data,timeperiod=14):
     name = "rsi"
-    rsi = talib.RSI(data['close'], timeperiod=timeperiod)
+    rsi = talib.RSI(data['Close'], timeperiod=timeperiod)
     data[name] = rsi
     return data[[name]]
 
@@ -238,7 +244,7 @@ def rsi_calculation(data,timeperiod=14):
 def williams_calculation(data, timeperiod=14):
 
     name = "williams"
-    williams = talib.WILLR(data["high"], data["low"], data["close"], timeperiod=timeperiod)
+    williams = talib.WILLR(data["High"], data["Low"], data["Close"], timeperiod=timeperiod)
     data[name] = williams
     return data[[name]]
 

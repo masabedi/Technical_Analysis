@@ -32,7 +32,6 @@ def going_past(month):
     relative_month_timestamp = datetime.timestamp(relative_month)
     return relative_month_timestamp
 
-
 def get_data(symbol, history_months:int, resolution="D"):
     from_date = int(going_past(history_months))
     to_date = int(going_past(0))
@@ -52,6 +51,13 @@ def get_data_period(symbol, from_date, resolution="D"):
     json_file = response.json()
     return json_file
 
+def date_convertor(timestapm_columns:pd.DataFrame):
+    index = timestapm_columns
+    for i in range(len(index)):
+        date = int(index[i])
+        index[i] = datetime.utcfromtimestamp(date).strftime('%Y-%m-%d')
+    index = index.astype("datetime64")
+    return index
 
 
 
@@ -96,10 +102,10 @@ def get_data_mysql(row):
     data = mycursor.fetchall()
     return data
 
-
 # convert data from database to panda data frame
 def database_convertor(data):
-    columns = ["time", "close", "high", "low", "open", "value"]
+    columns = ["Date", "Open", "High", "Low", "Close", "Volume"]
+
     df = pd.DataFrame(columns=columns)
     for i in data:
         time = i[1]
@@ -107,10 +113,13 @@ def database_convertor(data):
         high = i[3]
         low = i[4]
         open = i[5]
-        value = i[6]
-        item = [time, close, high, low, open, value]
+        volume = i[6]
+        item = [time, open, high, low, close, volume]
         append_df = pd.DataFrame([item], columns=columns)
         df = df.append(append_df, ignore_index=True)
+    date = date_convertor(df["Date"])
+    df.index = date
+    df = df.drop(columns=["Date"])
     return df
 
 # make data frame
@@ -124,14 +133,20 @@ def database_dataframe():
 
 # convert data from sahamyab to panda data frame
 def sahamyab_convertor(data:dict):
-    df = pd.DataFrame(columns=["Open","High","Low","Close","Volume"])
+    df = pd.DataFrame(index=[],columns=["Date","Open","High","Low","Close","Volume"])
 
-    df.index = data.get("t")
+    df["Date"] = data.get("t")
     df["Close"] = data.get("c")
     df["High"] = data.get("h")
     df["Low"] = data.get("l")
     df["Open"] = data.get("o")
     df["Volume"] = data.get("v")
+
+    # set time for index because refference of each record is its date
+    # first we should convert timestamp to date time format
+    date = date_convertor(df["Date"])
+    df.index = date
+    df = df.drop(columns=["Date"])
     return df
 
 # make data frame
@@ -145,7 +160,12 @@ def sahamyab_dataframe(symbol, months):
 if __name__ == "__main__":
 
     symbol = "وغدیر"
-    data = get_data(symbol, 1)
-    print(data)
+    sahamyab_data = sahamyab_dataframe(symbol, 1)
+    # db_data = database_dataframe()
 
+    data = sahamyab_data
+
+    # data = get_data(symbol, 1)
+
+    print(data)
 

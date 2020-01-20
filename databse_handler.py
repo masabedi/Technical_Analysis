@@ -14,7 +14,7 @@ mycursor = mydb.cursor()
 def add_to_database(data, symbol):
     # this function add data to symbols table
 
-    sqlstuff = "INSERT INTO prices (symbol, time, close, high, low, open, value) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    sqlstuff = "INSERT INTO prices (symbol, time, close, high, low, open, volume) VALUES (%s, %s, %s, %s, %s, %s, %s)"
     records = []
     for i in range(len(data.get("t"))):
         symbol = symbol
@@ -23,9 +23,9 @@ def add_to_database(data, symbol):
         high = data.get("h")[i]
         low = data.get("l")[i]
         open = data.get("o")[i]
-        value = data.get("v")[i]
+        volume = data.get("v")[i]
 
-        item = (symbol, time, close, high, low, open, value)
+        item = (symbol, time, close, high, low, open, volume)
         records.append(item)
 
     my_cursor.executemany(sqlstuff, records)

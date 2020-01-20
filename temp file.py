@@ -57,23 +57,13 @@ class SmaCross(Strategy):
 
 
 if __name__ == "__main__":
-    from backtesting.test import GOOG
-
-    date = date_convertor(data["time"])
-    date = date.astype("datetime64")
-    data.index = date
-    data = data.drop(columns=["time"])
-    data = data[["open", "high", "low", "close", "value"]]
-    data = data.rename(columns={"open" : "Open", "high" : "High", "low" : "Low", "close" : "Close", "value" : "Volume"})
-
-
-
-
 
     from backtesting import Backtest
     bt = Backtest(data, SmaCross, cash=10000, commission=.002)
     print(bt.run())
-    bt.plot()
+    # bt.plot()
+
+
 
 
 
