@@ -31,6 +31,12 @@
     
 #####Moving Average Convergence Divergence (MACD)
 
+    Positive MACD
+    Negative MACD
+    Signal Line Crossover
+    Center Line Crossover
+
+
 #####Average Directional Movement Index (ADX)
     For Stocks like commodities and currencies (Volatile Stocks)
     DI+ > DI- : Bull

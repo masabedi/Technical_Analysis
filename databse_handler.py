@@ -12,7 +12,7 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 
 def add_to_database(data, symbol):
-    # this function add data to symbols table
+    # this function add data to prices table
 
     sqlstuff = "INSERT INTO prices (symbol, time, close, high, low, open, volume) VALUES (%s, %s, %s, %s, %s, %s, %s)"
     records = []
@@ -28,7 +28,7 @@ def add_to_database(data, symbol):
         item = (symbol, time, close, high, low, open, volume)
         records.append(item)
 
-    my_cursor.executemany(sqlstuff, records)
+    mycursor.executemany(sqlstuff, records)
     mydb.commit()
 
 def get_data_mysql(row):
@@ -51,8 +51,8 @@ def get_last_data(row):
 
 if __name__ == "__main__":
 
-    last_data = get_last_data("time")
+    # last_data = get_last_data("time")
     symbol = "وغدیر"
-    data = history.get_data_period(symbol=symbol, from_date=last_data)
-    # data = history.get_data(symbol, 1)
-    print(data)
+    # data = history.get_data_period(symbol=symbol, from_date=last_data)
+    data = history.get_data(symbol,24)
+    add_to_database(data, symbol)
