@@ -64,10 +64,40 @@ class ema_cross(bt.Strategy):
     #     pnl = round(self.broker.getvalue() - self.startcash,1)
     #     print(f'Fast Period: {self.params.pfast} Slow Period: {self.params.pslow} Final PnL: {pnl}')
 
+class macd_cross(bt.Strategy):
+    # list of parameters which are configurable for the strategy
+    params = dict(
+        pfast=12,  # period for the fast moving average
+        pslow=26,   # period for the slow moving average
+        psignal=9
+    )
 
+    def __init__(self):
 
+        self.signal = []
+        self.startcash = self.broker.getvalue()
+        macd = bt.ind.MACD()
+        ema1 = bt.ind.EMA(period=self.p.pfast)  # fast moving average
+        ema2 = bt.ind.EMA(period=self.p.pslow)  # slow moving average
+        self.crossover = bt.ind.CrossOver(ema1, ema2)  # crossover signal
 
+    def next(self):
 
+        if not self.position:  # not in the market
+
+            if self.crossover > 0:  # if fast crosses slow to the upside
+                self.buy()  # enter long
+                self.signal.append(["buy", {"price": self.data.close[0]}, {"date": self.data.datetime.date()}])
+
+        else:
+
+            if self.crossover < 0:  # in the market & cross to the downside
+                self.sell()  # close long position
+                self.signal.append(["sell", {"price": self.data.close[0]}, {"date": self.data.datetime.date()}])
+
+            elif self.crossover > 0:  # if fast crosses slow to the upside
+                self.buy()  # enter long
+                self.signal.append(["buy", {"price": self.data.close[0]}, {"date": self.data.datetime.date()}])
 
 
 class back_test:
@@ -128,7 +158,7 @@ class back_test:
         cerebro = bt.Cerebro(optreturn=False)
 
         #Add our strategy
-        cerebro.optstrategy(self.strategy, pfast=range(5, 21), pslow=range(30, 60))
+        cerebro.optstrategy(self.strategy, pfast=range(5, 6), pslow=range(30, 31))
         # cerebro.optstrategy(strg, *kwargs)
 
         #Get Symbol data from database.
@@ -168,6 +198,8 @@ if __name__ == "__main__":
     persian = ema.persian_signals()
     optimizer = ema.ema_optimizer()
     print(optimizer)
+    print(signal)
+
 
 
 
